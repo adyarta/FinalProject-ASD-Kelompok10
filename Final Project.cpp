@@ -1,259 +1,242 @@
 #include <iostream>
-#include <string>
-#include <stdlib.h>
+#include <conio.h> //MENGGUNAKAN GETCH()
+#define MAX 1000 //MAKSIMAL NOMOR ANTRIAN
 
 using namespace std;
 
-//aplikasi penyimpanan data rawat inap rumah sakit
+int nomer[MAX];
+int headQueue = -1;
+int tailQueue = -1;
 
-struct node //node data pasien untuk antrean
-{
-    string name;
-    string ID;
-    string critical;
-    node* next;
-    node* prev;
+//Deklarasi stack dengan struct dan array
+struct STACK{
+    string nama;
+
+    STACK *next;
+    STACK *prev;
 };
 
-//deklarasi-deklarasi global - Linked List
-node* HeadNormal;
-node* TailNormal;
-node* HeadCrit;
-node* TailCrit;
+STACK *headStack, *tailStack, *cur, *newNode, *del;
+int maks = 5;
 
-//deklarasi-deklarasi global - Hashing
-const char apahash[] = "!@#$%^&*()_+-=";
-const char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
-const char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-int size = sizeof(apahash);
-int hashhash = 0; // hashlist
-string hashTable[10]; // ini hashtable
-string truehash[10]; // truehash
-
-
-////////////////////////////////////////
-void Hashing(string entry)
-    {
-        string NewEntry = entry;
-        string notjoji;
-        int bai = sizeof(NewEntry.size());
-        acak :
-            for (int j = 0; j < bai; j++)
-                {
-                    notjoji = notjoji + apahash[rand()% :: size];
-                }
-            for (int b = 0; b <= hashhash; b++)
-                {
-                    if(hashTable[b] == notjoji)
-                        {
-                            goto acak;
-                        }
-                }
-
-                cout << entry << " -> " << notjoji << endl;
-
-                truehash[hashhash] = entry;
-                hashTable[hashhash] = notjoji;
-                hashhash = hashhash + 1;
-                cout << "Hash Hashuu" << endl;
-        //Alexander
-        //$*!@sjader
-        //Jimmi Fernandes Rahman
-        //^&*#sdfman
-    }
-
-void Display() //display antrean
-{
-    node* tempNormal;
-    node* tempCrit;
-    tempNormal = HeadNormal;
-    int urut = 1;
-    while (tempCrit != NULL)
-    {
-        cout << urut <<". " << tempCrit -> ID << " - "<<tempCrit -> name<< " - " << tempCrit->critical<<endl;
-        tempCrit = tempCrit ->next;
-        urut = urut +1;
-    }
-    while (tempNormal != NULL)
-    {
-        cout << urut <<". " << tempNormal -> ID << " - "<<tempNormal -> name<< " - " << tempNormal->critical<<endl;
-        tempNormal = tempNormal ->next;
-        urut = urut +1;
-    }
-}
-
-bool check(string entry)
-{
-    int checklist = 0;
-    while (checklist != hashhash)
-    {
-        if (entry == truehash[checklist])
-        {
-            return true;        
+int countStack(){
+    if(headStack == NULL){
+        return 0;
+    }else{
+        int banyak = 0;
+        cur = headStack;
+        while(cur != NULL){
+            cur = cur->next;
+            banyak++;
         }
-        else
-        {
+        return banyak;
+    }
+}
+
+void createStack(string nama){
+    headStack = new STACK();
+    headStack->nama = nama;
+    headStack->next = NULL;
+    headStack->prev = NULL;
+    tailStack = headStack;
+}
+
+//fungsi untuk menyisipkan data ke stack
+void push(string data){
+   if(countStack() == maks){
+        cout << "stack full" << endl;
+    }else{
+        if(countStack() == 0){
+            createStack(data);
+        }else{
+            newNode = new STACK();
+            newNode->nama = data;
+            newNode->next = NULL;
+            newNode->prev = tailStack;
+            tailStack = newNode;
         }
-        return false;
     }
 }
 
-void InsertNormalPatient(string entry, int crit) // masukkan antrean baru untuk pasien yang tidak kritis
-//pasien yang tidak kritis akan mengantri dari belakang
-{
-    node* temp = new node;
-    temp -> name = entry;
-    Hashing(entry);
-    if (crit >= 2)
-    {
-        temp -> critical = "Rawat Inap";
-    }
-    else if (crit <=1)
-    {
-        temp -> critical = "Rawat Jalan";
-    }
+bool IsEmptyQueue(){ // FUNGSI UNTUK MENUNJUKAN JIKA TAIL = -1
+   if(tailQueue == -1){
+       return true;
+   }else{
+       return false;
+   }
+}
+bool IsFullQueue(){ // FUNGSI UNTUK MENUNJUKAN JIKA TAIL = MAX-1
+   if(tailQueue == MAX-1){
+       return true;
+   }else{
+       return false;
+   }
+}
 
-    if (HeadNormal == NULL)
-    {
-        temp -> next = NULL;
-        temp -> prev = NULL;
-        HeadNormal = temp;
-        TailNormal = HeadNormal;
+void AntrianMasuk(int no){
+    if (IsEmptyQueue()){
+        headQueue = tailQueue = 0;
+    }else {
+        tailQueue++;
     }
+    nomer[tailQueue] = no;
+}
 
-    else
-    {
-        TailNormal -> next = temp;
-        temp -> next = NULL;
-        temp -> prev = TailNormal;
-        TailNormal = temp;
+void AntrianKeluar(){
+    if(IsEmptyQueue()){
+        cout<<"Antrian sudah kosong ! ";
+        getch();
+    }else {
+        for(int a=headQueue;a<tailQueue;a++){
+            nomer[a]=nomer[a+1];
+        }
+        tailQueue--;
+        if(tailQueue == -1){
+            headQueue = -1;
+        }
     }
 }
 
-void InsertEmergencyPatient(string entry, int crit)
-{
-    node* temp = new node;
-    temp -> name = entry;
-    Hashing(entry);
-    if (crit == 1)
-    {
-        temp -> critical = "Mengkhawatirkan";
-    }
-    else if (crit == 2)
-    {
-        temp -> critical = "Gawat Darurat";
-    }
-    else if (crit == 3)
-    {
-        temp -> critical = "Kronis";
-    }
+void Clear(){
+     headQueue = tailQueue = -1;
+}
 
-    if (HeadCrit == NULL)
-    {
-        temp -> next = NULL;
-        temp -> prev = NULL;
-        HeadCrit = temp;
-        TailCrit = HeadCrit;
+void viewStack(){
+    if(headStack == NULL){
+        cout << "Stack kosong" << endl;
+    }else{
+        int nomor = 1;
+        cur = tailStack;
+        cout << "===Tumpukan Nama Pasien===" << endl;
+        while(cur != NULL){
+            cout << nomor << ". " << cur->nama << endl;
+            cur = cur->prev;
+            nomor++;
+        }
     }
+}
+void viewQueue(){
+     if(IsEmptyQueue()){
+         cout << "Antrian kosong ! ";
 
-    else
-    {
-        HeadCrit -> prev = temp;
-        temp -> next = HeadCrit;
-        temp -> prev = NULL;
-        HeadCrit = temp;
-    }
+     }else {
+         system("cls");
+         for(int a=headQueue;a<=tailQueue;a++){
+              cout << "==============================="
+                   << "\n >> No. Antri : [" << nomer[a] << "]"
+                   << "\n==============================="<< endl;
+         }
+     }
 }
 
 
-int main () //program utama; berisikan main menu
-    {
-        int crit;
-        string entri;
-        char input;
-        MainMenu:
-        cout << "=== Aplikasi Administrasi Rawat Inap Rumah Sakit ===" << endl;
-        cout << "====================================================" << endl;
-        cout << "Antrean Rawat Inap : " << endl;
-        Display();
-        cout << "====================================================" << endl;
-        cout << "Main Menu : "<< endl;
-        cout << "1. Daftarkan antrean pasien normal" << endl;
-        cout << "2. Daftarkan antrean pasien darurat" << endl;
-        cout << "3. Checkout Pasien" << endl;
-        cout << "4. Tampilkan key ID" << endl;
-        cout << "9. Help" << endl;
-        cout << "0. Exit" << endl;
-        cout << "====================================================" << endl;
-        cout << "Entri: "; 
-        cin >> input;
-        switch (input)
-            {            
-                case '0':
-                    cout << "================================ BYE BYE =====================================" << endl;
-                    cout << "Thank you for running this program!"<< endl;
-                    cout << "Made by SpectreOfSolitude, MrJM OF THE DARKSIDE, Ratonhnhaké:ton, and Zwinglee" << endl;
-                    cout << "==============================================================================" << endl;
-                    return 0;
-                    break;
-                    
-                case '1':
-                    cout << "Masukkan nama pasien yang ingin didaftarkan untuk dirujuk: "; 
-                    getline(cin, entri);
-                    cout << "Level Kekritisan: " << endl;
-                    cout << "1. Rawat Jalan" << endl;
-                    cout << "2. Rawat Inap" << endl;
-                    cout << "================================" << endl;
-                    cout << "Masukkan level kekritisan: "; 
-                    cin >> crit;
-                    if (crit == 1) // rawat jalan
-                    {
-                        check(entri);
-                            // Ini tidak akan dimasukkan ke queue, karena ini aplikasi rawat inap.
-                            // Jika pasien blom pernah mendaftar, maka hashing tetap dilakukan.
-                    }
-                    else if (crit == 2) // rawat inap biasa
-                    {
-                        InsertNormalPatient(entri, crit); //Ini masuk ke pendaftaran struktur queue
-                    }
-                    else 
-                    {
-                        cout << "Input salah. Silahkan ulangi penginputan." << endl;
-                        goto MainMenu;
-                    }
-                    break;
+void menuAntrian();
+void menuAdmin();
+void menuUtama();
 
-                case '2':
-                  cout << "Masukkan nama pasien yang ingin didaftarkan untuk dirujuk: "; 
-                    getline(cin, entri);
-                    cout << endl;
-                    cout << "Level Kekritisan: " << endl;
-                    cout << "1. Mengkhawatirkan" << endl;
-                    cout << "2. Gawat Darurat" << endl;
-                    cout << "3. Kronis" << endl;
-                    cout << "================================" << endl;
-                    cout << "Masukkan level kekritisan: "; 
-                    cin >> crit;
-                    if (crit < 1 || crit > 3)
-                    {
-                        cout << "Input salah. Silahkan ulangi penginputan." << endl;
-                        goto MainMenu;
-                    }
-                    InsertEmergencyPatient(entri, crit); // ini struktur pendaftaran stack
-                    break;
+int main(){
+    menuUtama();
+}
 
-                case '3': // 
-                    break;
-                    
-                case '4': // menampilkan Data Pasien yang di panggil dengan ID 
-                    break;
-                    
-                case '9': // Help
-                    cout <<"Ini penjelasan mengenai program simulasi inap yang udah dibuat." << endl;
-                    break;
+void menuUtama(){
+    int choose;
+    string nama;
+    system("cls");
+    cout << "=====MENU MASUK=====" << endl;
+    cout << "1. Pasien" << endl;
+    cout << "2. Admin" << endl;
+    cout << "0. Exit" << endl;
+    cout << "Pilih: ";
+    cin >> choose;
 
-                default:
-                    break;
+    switch (choose){
+    case 1:
+        cout << "===DAFTAR DULU===" << endl;
+        cout << "Nama: ";
+        cin >> nama;
+        push(nama);
+        menuAntrian();
+        break;
+    case 2:
+        menuAdmin();
+        break;
+
+    case 0:
+        system("cls");
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void menuAdmin(){
+    int choose;
+    do{
+        system("cls");
+        cout << "\n\n===== MENU ADMIN ====="
+             << "\n|1. Panggil Antrian           |"
+             << "\n|2. Lihat daftar pasien       |"
+             << "\n|3. Lihat daftar antrian      |"
+             << "\n|4. Format                    |"
+             << "\n|0. Exit                      |";
+        cout << "\nChoose ! "; cin >> choose;
+        cout << "\n\n";
+
+        if(choose == 1){
+            cout << "=================================" << endl;
+            cout << "No. Antri : [" << nomer[headQueue] << "]";
+            cout << "\n=================================" << endl;
+            AntrianKeluar();
+            cout << "Silahkan Dipanggil !" << endl;
+        }else if(choose == 2){
+                viewStack();
+        }else if(choose == 3){
+                viewQueue();
+        }else if(choose == 4){
+            Clear();
+            cout<<"Antrian dikosongkan ! ";
+        }else if(choose == 0){
+            menuUtama();
+        }
+         getch();
+    } while (choose != 5);
+    
+}
+
+void menuAntrian(){
+    int choose, p=1, urut; //deklarasi untuk pilihan user dan nomer urut antrian
+    do{
+        system("cls");
+        cout << "\n\n===== ANTRIAN PASIEN ====="
+             << "\n==============================="
+             << "\n|1. Tambah Antrian            |"
+             << "\n|0. Exit                      |"
+             << "\n===============================";
+        cout << "\nChoose ! "; cin >> choose;
+        cout << "\n\n";
+        if(choose == 1){
+            if(IsFullQueue()) {
+                cout<<"Antrian sudah penuh, mohon tunggu beberapa saat lagi ";
             }
-        goto MainMenu;
-    }
+            else{
+                urut=p;
+                AntrianMasuk(urut);
+                cout << "---------------------------------" << endl;
+                cout << "|          NO. ANTRIAN          |" << endl;
+                cout << "|               " << p << "              ||" << endl;
+                cout << "---------------------------------" << endl;
+                cout << "|       Silahkan Mengantri      |" << endl;
+                cout << "|      Menunggu " << tailQueue << " Antrian      ||" << endl;
+                cout << "---------------------------------" << endl;
+                p++;
+            }
+        }else if(choose == 0){
+            menuUtama();
+        }
+        else{
+            cout << "Masukan anda salah ! \n"<< endl;
+        }
+        getch();
+    }while(choose !=5 );
+}
